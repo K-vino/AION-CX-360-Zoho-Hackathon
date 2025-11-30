@@ -1,0 +1,340 @@
+{
+    "name": "AION-CX 360",
+    "description": "AI Revenue & Customer Intelligence OS Bot",
+    "version": "1.0.0",
+    "platform": "Zoho SalesIQ",
+    "type": "Codeless_Functions",
+    "settings": {
+        "language": "en",
+        "channels": [
+            "website"
+        ],
+        "persistence": true
+    },
+    "context_variables": [
+        "visitor_name",
+        "visitor_email",
+        "company",
+        "industry",
+        "budget",
+        "timeline",
+        "use_case",
+        "persona",
+        "language",
+        "backend_response"
+    ],
+    "flow": [
+        {
+            "id": "root",
+            "type": "message",
+            "text": "Choose your language / மொழி தேர்வு செய்யவும்:",
+            "options": [
+                {
+                    "label": "English",
+                    "action": "goto",
+                    "target": "welcome_en"
+                },
+                {
+                    "label": "தமிழ்",
+                    "action": "goto",
+                    "target": "welcome_ta"
+                }
+            ]
+        },
+        {
+            "id": "welcome_en",
+            "type": "message",
+            "text": "Hi, I’m AION — your AI assistant. Are you here for pricing, product questions, or support today?",
+            "options": [
+                {
+                    "label": "💰 Pricing & Plans",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Pricing Agent",
+                    "next": "ask_name_en"
+                },
+                {
+                    "label": "🚀 Product & Features",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Product Advisor",
+                    "next": "ask_name_en"
+                },
+                {
+                    "label": "📞 Talk to Sales",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Sales Agent",
+                    "next": "ask_name_en"
+                },
+                {
+                    "label": "🛠 Support",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Support Agent",
+                    "next": "support_flow_en"
+                }
+            ]
+        },
+        {
+            "id": "welcome_ta",
+            "type": "message",
+            "text": "வணக்கம்! நான் AION. உங்களுக்கு என்ன உதவி தேவை?",
+            "options": [
+                {
+                    "label": "💰 விலை விபரங்கள்",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Pricing Agent",
+                    "next": "ask_name_ta"
+                },
+                {
+                    "label": "🚀 தயாரிப்பு விபரங்கள்",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Product Advisor",
+                    "next": "ask_name_ta"
+                },
+                {
+                    "label": "📞 விற்பனைப் பிரிவு",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Sales Agent",
+                    "next": "ask_name_ta"
+                },
+                {
+                    "label": "🛠 உதவி",
+                    "action": "set_variable",
+                    "variable": "persona",
+                    "value": "Support Agent",
+                    "next": "support_flow_ta"
+                }
+            ]
+        },
+        {
+            "id": "support_flow_en",
+            "type": "input",
+            "text": "I can help with common issues. Please describe your problem.",
+            "variable": "use_case",
+            "next": "support_check"
+        },
+        {
+            "id": "support_check",
+            "type": "logic",
+            "condition": "contains(use_case, 'ticket') or contains(use_case, 'human')",
+            "true_target": "handover",
+            "false_target": "support_response"
+        },
+        {
+            "id": "support_response",
+            "type": "message",
+            "text": "I've noted that. For complex issues, I recommend talking to an agent.",
+            "options": [
+                {
+                    "label": "Talk to Human",
+                    "action": "goto",
+                    "target": "handover"
+                },
+                {
+                    "label": "Back to Menu",
+                    "action": "goto",
+                    "target": "welcome_en"
+                }
+            ]
+        },
+        {
+            "id": "ask_name_en",
+            "type": "input",
+            "text": "Great! To get started, what is your **Name**?",
+            "variable": "visitor_name",
+            "next": "ask_email_en"
+        },
+        {
+            "id": "ask_email_en",
+            "type": "input",
+            "text": "Thanks! What is your **Work Email**?",
+            "validation": "email",
+            "variable": "visitor_email",
+            "next": "ask_company_en"
+        },
+        {
+            "id": "ask_company_en",
+            "type": "input",
+            "text": "Which **Company** are you from?",
+            "variable": "company",
+            "next": "ask_industry_en"
+        },
+        {
+            "id": "ask_industry_en",
+            "type": "message",
+            "text": "Which **Industry** do you belong to?",
+            "options": [
+                {
+                    "label": "SaaS",
+                    "action": "set_variable",
+                    "variable": "industry",
+                    "value": "SaaS",
+                    "next": "ask_budget_en"
+                },
+                {
+                    "label": "E-commerce",
+                    "action": "set_variable",
+                    "variable": "industry",
+                    "value": "E-commerce",
+                    "next": "ask_budget_en"
+                },
+                {
+                    "label": "EdTech",
+                    "action": "set_variable",
+                    "variable": "industry",
+                    "value": "EdTech",
+                    "next": "ask_budget_en"
+                },
+                {
+                    "label": "Other",
+                    "action": "input",
+                    "variable": "industry",
+                    "next": "ask_budget_en"
+                }
+            ]
+        },
+        {
+            "id": "ask_budget_en",
+            "type": "message",
+            "text": "Do you have an approximate **Budget Range**?",
+            "options": [
+                {
+                    "label": "< $10k",
+                    "action": "set_variable",
+                    "variable": "budget",
+                    "value": "< $10k",
+                    "next": "ask_timeline_en"
+                },
+                {
+                    "label": "$10k - $50k",
+                    "action": "set_variable",
+                    "variable": "budget",
+                    "value": "$10k - $50k",
+                    "next": "ask_timeline_en"
+                },
+                {
+                    "label": "> $50k",
+                    "action": "set_variable",
+                    "variable": "budget",
+                    "value": "> $50k",
+                    "next": "ask_timeline_en"
+                }
+            ]
+        },
+        {
+            "id": "ask_timeline_en",
+            "type": "message",
+            "text": "When are you planning to implement?",
+            "options": [
+                {
+                    "label": "Immediately",
+                    "action": "set_variable",
+                    "variable": "timeline",
+                    "value": "Immediate",
+                    "next": "ask_usecase_en"
+                },
+                {
+                    "label": "1-3 Months",
+                    "action": "set_variable",
+                    "variable": "timeline",
+                    "value": "1-3 Months",
+                    "next": "ask_usecase_en"
+                },
+                {
+                    "label": "Later",
+                    "action": "set_variable",
+                    "variable": "timeline",
+                    "value": "Later",
+                    "next": "ask_usecase_en"
+                }
+            ]
+        },
+        {
+            "id": "ask_usecase_en",
+            "type": "input",
+            "text": "Briefly describe your use case or requirements.",
+            "variable": "use_case",
+            "next": "backend_call"
+        },
+        {
+            "id": "backend_call",
+            "type": "function",
+            "function_name": "sendToAIONBackend",
+            "description": "Sends collected data to AION-CX Backend",
+            "payload": {
+                "visitor_id": "${visitor.id}",
+                "name": "${visitor_name}",
+                "email": "${visitor_email}",
+                "company": "${company}",
+                "industry": "${industry}",
+                "budget": "${budget}",
+                "timeline": "${timeline}",
+                "use_case": "${use_case}",
+                "bot_mode": "${persona}"
+            },
+            "on_success": "ai_analysis_display",
+            "on_failure": "fallback_error"
+        },
+        {
+            "id": "ai_analysis_display",
+            "type": "message",
+            "text": "✅ **Analysis Complete**\n\n${backend_response.ai_summary}\n\n**Score**: ${backend_response.lead_score}/100 | **Status**: ${backend_response.status}",
+            "next": "cta_options"
+        },
+        {
+            "id": "cta_options",
+            "type": "message",
+            "text": "How would you like to proceed?",
+            "options": [
+                {
+                    "label": "📅 Book Demo",
+                    "action": "link",
+                    "url": "https://calendly.com/aion-demo",
+                    "next": "end"
+                },
+                {
+                    "label": "📄 Show Plans",
+                    "action": "message",
+                    "text": "We have Starter, Pro, and Enterprise plans. Checking fit...",
+                    "next": "handover"
+                },
+                {
+                    "label": "👤 Talk to Human",
+                    "action": "goto",
+                    "target": "handover"
+                }
+            ]
+        },
+        {
+            "id": "handover",
+            "type": "handover",
+            "message": "Connecting you to a specialist...",
+            "department": "Sales"
+        },
+        {
+            "id": "fallback_error",
+            "type": "message",
+            "text": "I'm having trouble connecting to the brain. Connecting you to a human...",
+            "next": "handover"
+        }
+    ],
+    "functions": {
+        "sendToAIONBackend": {
+            "url": "https://YOUR_NGROK_URL/events/salesiq",
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "response_map": {
+                "ai_summary": "lead.ai_summary",
+                "lead_score": "lead.lead_score",
+                "status": "lead.status"
+            }
+        }
+    }
+}

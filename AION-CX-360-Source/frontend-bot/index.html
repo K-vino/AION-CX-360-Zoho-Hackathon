@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AION-CX 360° | AI Assistant</title>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bot-bg: #f1f5f9;
+            --user-bg: #2563eb;
+            --user-text: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-sidebar: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #60a5fa;
+            --primary-light: rgba(96, 165, 250, 0.1);
+            --bot-bg: #334155;
+            --user-bg: #60a5fa;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* LAYOUT */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 20;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+            position: relative;
+        }
+
+        /* HEADER */
+        header {
+            height: 64px;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-body));
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 10;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand span {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-sub);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-body);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .persona-badge {
+            padding: 4px 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* CHAT AREA */
+        .chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+            background: var(--bg-body);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .msg-bot {
+            align-self: flex-start;
+            background: var(--bot-bg);
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: var(--user-bg);
+            color: var(--user-text);
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .msg-meta {
+            font-size: 10px;
+            margin-top: 6px;
+            opacity: 0.7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .msg-bot .msg-meta {
+            justify-content: flex-start;
+        }
+
+        .msg-user .msg-meta {
+            justify-content: flex-end;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .typing {
+            align-self: flex-start;
+            background: var(--bot-bg);
+            padding: 12px 16px;
+            border-radius: 16px;
+            display: none;
+            margin-bottom: 8px;
+        }
+
+        .typing.active {
+            display: block;
+            animation: fadeIn 0.2s;
+        }
+
+        .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-sub);
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* INPUT AREA */
+        .input-container {
+            padding: 20px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .chips-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .chip {
+            white-space: nowrap;
+            padding: 6px 12px;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-sub);
+            transition: 0.2s;
+        }
+
+        .chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 6px 6px 6px 16px;
+            transition: 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+            background: var(--bg-card);
+        }
+
+        input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            padding: 8px 0;
+        }
+
+        .btn-send {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .btn-send:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .btn-attach {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 8px;
+        }
+
+        .btn-attach:hover {
+            color: var(--primary);
+        }
+
+        /* SIDEBAR CONTENT */
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .score-bar-bg {
+            height: 8px;
+            background: var(--bg-body);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 1s ease-out;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        /* MODAL & TOAST */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal {
+            background: var(--bg-card);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: scaleIn 0.2s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            display: none;
+        }
+
+        /* ONBOARDING */
+        .onboarding-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .role-card {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            background: var(--bg-card);
+        }
+
+        .role-card:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .role-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .role-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                transform: translateX(100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .brand span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="chat-section">
+            <header>
+                <div class="brand">
+                    <div
+                        style="width:32px; height:32px; background:linear-gradient(135deg, #2563eb, #8b5cf6); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
+                        A</div>
+                    <span>AION-CX 360°</span>
+                </div>
+                <div id="personaBadge" class="persona-badge">General Assistant</div>
+                <div class="header-actions">
+                    <button class="btn-icon" onclick="toggleTheme()" title="Theme">🌗</button>
+                    <button class="btn-icon" onclick="showHelp()" title="Help">?</button>
+                    <button class="btn-icon" onclick="toggleSidebar()" title="Info">ℹ️</button>
+                </div>
+            </header>
+
+            <div class="chat-window" id="chat">
+                <!-- Messages injected here -->
+            </div>
+
+            <div class="typing" id="typing">
+                <div class="dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="chips-row" id="quickChips"></div>
+                <div class="input-wrapper">
+                    <button class="btn-attach" onclick="toast('Attachment feature coming soon!')">📎</button>
+                    <input type="text" id="input" placeholder="Type a message..." autocomplete="off">
+                    <button class="btn-send" id="sendBtn">➤</button>
+                </div>
+                <div style="text-align:center; font-size:10px; color:var(--text-sub);">
+                    AI can make mistakes. Please verify important information.
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span>Session Insights</span>
+                <button class="btn-icon" onclick="toggleSidebar()" style="width:28px; height:28px;">✕</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="info-group">
+                    <div class="info-label">Lead Profile</div>
+                    <div class="info-value" id="pName">Guest Visitor</div>
+                    <div style="font-size:12px; color:var(--text-sub);" id="pRole">Unknown Role</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">AI Lead Score</div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                        <span id="scoreVal">0</span> <span>/ 100</span>
+                    </div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" id="scoreBar"></div>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Intent Analysis</div>
+                    <div id="intentTags">
+                        <span class="tag">Analyzing...</span>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Actions</div>
+                    <button class="role-card" style="width:100%; padding:10px; margin-bottom:8px;"
+                        onclick="exportChat()">📥 Export Chat</button>
+                    <button class="role-card"
+                        style="width:100%; padding:10px; color:var(--danger); border-color:var(--border);"
+                        onclick="resetChat()">🔄 Reset Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="helpModal" onclick="closeModal(event)">
+        <div class="modal">
+            <h2 style="margin-bottom:16px;">How to use AION-CX</h2>
+            <p style="color:var(--text-sub); line-height:1.6; margin-bottom:16px;">
+                This AI assistant simulates a real-time sales and support agent. It can answer questions, qualify leads,
+                and switch personas based on your needs.
+            </p>
+            <div style="background:var(--bg-body); padding:12px; border-radius:8px; margin-bottom:16px;">
+                <strong>Try asking:</strong>
+                <ul style="margin-left:20px; margin-top:8px; color:var(--text-sub); font-size:13px;">
+                    <li>"What is your pricing for enterprise?"</li>
+                    <li>"I need help with integration."</li>
+                    <li>"Book a demo for next week."</li>
+                </ul>
+            </div>
+            <button class="btn-send" style="width:100%; border-radius:8px;" onclick="closeModal()">Got it</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <canvas class="confetti" id="confetti"></canvas>
+
+    <script>
+        // --- CONFIG & STATE ---
+        const API_URL = localStorage.getItem("aion_backend_url") || "http://localhost:3000";
+        const VISITOR_ID = localStorage.getItem('aion_vid') || crypto.randomUUID();
+        localStorage.setItem('aion_vid', VISITOR_ID);
+
+        let STATE = {
+            history: [],
+            profile: { name: 'Guest', role: 'Visitor', email: '', company: '', budget: '', timeline: '', language: 'en' },
+            step: 0,
+            persona: 'General Assistant',
+            score: 10,
+            demoMode: false
+        };
+
+        const PERSONAS = {
+            'sales': { name: 'Sales Agent', color: '#10b981' },
+            'pricing': { name: 'Pricing Assistant', color: '#f59e0b' },
+            'support': { name: 'Support Agent', color: '#3b82f6' },
+            'product': { name: 'Product Advisor', color: '#8b5cf6' },
+            'general': { name: 'General Assistant', color: '#64748b' }
+        };
+
+        // --- INIT ---
+        window.onload = () => {
+            loadState();
+            applyTheme();
+            renderProfile();
+
+            if (STATE.history.length === 0) {
+                showOnboarding();
+            } else {
+                STATE.history.forEach(msg => renderMessage(msg));
+                scrollToBottom();
+            }
+
+            document.getElementById('input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        };
+
+        // --- CHAT LOGIC ---
+        async function sendMessage(text = null) {
+            const input = document.getElementById('input');
+            const msgText = text || input.value.trim();
+            if (!msgText) return;
+
+            // User Message
+            addMessage('user', msgText);
+            input.value = '';
+
+            // AI Processing
+            showTyping(true);
+
+            // 1. Intent Detection (Mock or API)
+            const intent = await detectIntent(msgText);
+            switchPersona(intent);
+
+            // 2. Qualification Flow
+            let reply = "";
+            let isQualifying = false;
+
+            if (STATE.step === 1) {
+                STATE.profile.name = msgText;
+                reply = `Nice to meet you, ${msgText}. What's your **Email Address**?`;
+                STATE.step++; isQualifying = true;
+            } else if (STATE.step === 2) {
+                STATE.profile.email = msgText;
+                reply = "Got it. What **Company** are you representing?";
+                STATE.step++; isQualifying = true;
+            } else if (STATE.step === 3) {
+                STATE.profile.company = msgText;
+                reply = "And what is your estimated **Budget** range?";
+                STATE.step++; isQualifying = true;
+            } else if (STATE.step === 4) {
+                STATE.profile.budget = msgText;
+                reply = "Thanks! Analyzing your needs...";
+                STATE.step++; isQualifying = true;
+                setTimeout(() => finalizeLead(), 1500);
+            }
+
+            // 3. Generate Reply
+            if (!isQualifying) {
+                reply = await getAIReply(msgText);
+            }
+
+            // Simulate Delay
+            setTimeout(() => {
+                showTyping(false);
+                addMessage('bot', reply);
+                if (STATE.score > 80) fireConfetti();
+            }, isQualifying ? 1000 : 1500 + Math.random() * 1000);
+        }
+
+        function addMessage(role, text) {
+            const msg = { role, text, time: new Date().toISOString() };
+            STATE.history.push(msg);
+            saveState();
+            renderMessage(msg);
+        }
+
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            div.className = `message msg-${msg.role}`;
+            const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Markdown-ish parsing
+            let content = msg.text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            div.innerHTML = `
+        ${content}
+        <div class="msg-meta">
+            <span>${msg.role === 'bot' ? STATE.persona : 'You'}</span>
+            <span>${time}</span>
+        </div>
+    `;
+
+            document.getElementById('chat').appendChild(div);
+            scrollToBottom();
+        }
+
+        // --- AI & BACKEND ---
+        async function detectIntent(text) {
+            const t = text.toLowerCase();
+            if (t.includes('price') || t.includes('cost')) return 'pricing';
+            if (t.includes('help') || t.includes('issue') || t.includes('error')) return 'support';
+            if (t.includes('buy') || t.includes('demo') || t.includes('book')) return 'sales';
+            if (t.includes('how') || t.includes('what is')) return 'product';
+            return 'general';
+        }
+
+        function switchPersona(key) {
+            const p = PERSONAS[key] || PERSONAS['general'];
+            STATE.persona = p.name;
+            const badge = document.getElementById('personaBadge');
+            badge.innerText = p.name;
+            badge.style.color = p.color;
+            badge.style.background = p.color + '20';
+        }
+
+        async function getAIReply(text) {
+            if (STATE.demoMode) return getMockReply(text);
+
+            try {
+                const res = await fetch(`${API_URL}/ai/reply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        visitor_id: VISITOR_ID,
+                        message: text,
+                        persona: STATE.persona,
+                        context: STATE.history.slice(-5)
+                    })
+                });
+                if (!res.ok) throw new Error("Backend Error");
+                const data = await res.json();
+                return data.reply || "I'm not sure, but I can connect you to an agent.";
+            } catch (e) {
+                console.warn("Backend Offline, switching to Demo Mode");
+                STATE.demoMode = true;
+                toast("Backend unreachable. Demo Mode Active.");
+                return getMockReply(text);
+            }
+        }
+
+        function getMockReply(text) {
+            const t = text.toLowerCase();
+            if (t.includes('price')) return "Our pricing starts at **$49/month** for the Starter plan. Would you like to see the Enterprise options?";
+            if (t.includes('demo')) return "I can definitely help you book a demo. What time works best for you next week?";
+            if (t.includes('hello') || t.includes('hi')) return "Hello! How can I assist you today?";
+            return "That's an interesting question. Could you provide more details so I can help better?";
+        }
+
+        async function finalizeLead() {
+            STATE.score = 85; // Mock Score
+            renderProfile();
+
+            const payload = {
+                visitor_id: VISITOR_ID,
+                ...STATE.profile,
+                chat_transcript: JSON.stringify(STATE.history)
+            };
+
+            try {
+                if (!STATE.demoMode) {
+                    await fetch(`${API_URL}/events/salesiq`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+                addMessage('bot', `✅ **Profile Completed**<br>I've analyzed your needs and assigned a **High Priority** score. A specialist will be with you shortly.`);
+            } catch (e) {
+                addMessage('bot', "Profile saved locally (Offline Mode).");
+            }
+        }
+
+        // --- UI HELPERS ---
+        function showOnboarding() {
+            const div = document.createElement('div');
+            div.innerHTML = `
+        <div style="text-align:center; margin:20px 0;">
+            <h3>Welcome to AION-CX</h3>
+            <p style="color:var(--text-sub); font-size:14px;">Please select your role to get started:</p>
+            <div class="onboarding-grid">
+                <div class="role-card" onclick="setRole('Founder')"><span class="role-icon">🚀</span><span class="role-name">Founder</span></div>
+                <div class="role-card" onclick="setRole('Sales')"><span class="role-icon">💼</span><span class="role-name">Sales</span></div>
+                <div class="role-card" onclick="setRole('Support')"><span class="role-icon">🎧</span><span class="role-name">Support</span></div>
+                <div class="role-card" onclick="setRole('Student')"><span class="role-icon">🎓</span><span class="role-name">Student</span></div>
+            </div>
+        </div>
+    `;
+            document.getElementById('chat').appendChild(div);
+        }
+
+        function setRole(role) {
+            STATE.profile.role = role;
+            STATE.step = 1; // Start qualification
+            document.getElementById('chat').innerHTML = ''; // Clear onboarding
+            addMessage('bot', `Welcome, ${role}! To serve you better, may I have your **Name**?`);
+            renderProfile();
+        }
+
+        function renderProfile() {
+            document.getElementById('pName').innerText = STATE.profile.name || 'Guest';
+            document.getElementById('pRole').innerText = STATE.profile.role;
+            document.getElementById('scoreVal').innerText = STATE.score;
+            document.getElementById('scoreBar').style.width = `${STATE.score}%`;
+
+            // Update Chips based on role
+            const chips = document.getElementById('quickChips');
+            chips.innerHTML = '';
+            const suggestions = [
+                "What is AION?",
+                STATE.profile.role === 'Sales' ? "Book a Demo" : "Pricing Plans",
+                "Contact Support"
+            ];
+            suggestions.forEach(s => {
+                const c = document.createElement('div');
+                c.className = 'chip';
+                c.innerText = s;
+                c.onclick = () => sendMessage(s);
+                chips.appendChild(c);
+            });
+        }
+
+        function showTyping(show) {
+            const el = document.getElementById('typing');
+            if (show) {
+                el.classList.add('active');
+                scrollToBottom();
+            } else {
+                el.classList.remove('active');
+            }
+        }
+
+        function scrollToBottom() {
+            const chat = document.getElementById('chat');
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function toggleTheme() {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function applyTheme() {
+            if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+        }
+
+        function showHelp() { document.getElementById('helpModal').style.display = 'flex'; }
+        function closeModal(e) { if (!e || e.target.className.includes('modal-overlay') || e.target.tagName === 'BUTTON') document.getElementById('helpModal').style.display = 'none'; }
+
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function saveState() { localStorage.setItem('aion_chat_state', JSON.stringify(STATE)); }
+        function loadState() {
+            const s = localStorage.getItem('aion_chat_state');
+            if (s) STATE = { ...STATE, ...JSON.parse(s) };
+        }
+        function resetChat() {
+            localStorage.removeItem('aion_chat_state');
+            location.reload();
+        }
+        function exportChat() {
+            const text = STATE.history.map(m => `[${m.role.toUpperCase()}] ${m.time}: ${m.text}`).join('\n');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'aion_chat.txt';
+            a.click();
+            toast("Chat exported!");
+        }
+
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti');
+            canvas.style.display = 'block';
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const pieces = Array.from({ length: 100 }).map(() => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                size: Math.random() * 5 + 2,
+                speed: Math.random() * 5 + 2
+            }));
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                pieces.forEach(p => {
+                    p.y += p.speed;
+                    if (p.y < canvas.height) active = true;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+                if (active) requestAnimationFrame(animate);
+                else canvas.style.display = 'none';
+            }
+            animate();
+        }
+    </script>
+</body>
+
+</html>

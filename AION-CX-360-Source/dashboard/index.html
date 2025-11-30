@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AION-CX 360° | Executive Dashboard</title>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --font: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-sidebar: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #60a5fa;
+            --primary-light: rgba(96, 165, 250, 0.1);
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        aside {
+            width: 260px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+
+        .brand {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand span {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .nav-menu {
+            padding: 20px 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-sub);
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-body);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .user-profile {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* MAIN CONTENT */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        header {
+            height: 60px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .demo-badge {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            display: none;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-sub);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-body);
+            color: var(--primary);
+        }
+
+        /* TABS */
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* COMPONENTS */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-body);
+            border-color: var(--text-sub);
+        }
+
+        input,
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        /* OVERVIEW TAB */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+            width: 100%;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .insights-panel {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(96, 165, 250, 0.05));
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .insight-item {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+            margin-bottom: 8px;
+            align-items: flex-start;
+        }
+
+        .insight-icon {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* LEADS TAB */
+        .filters-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: var(--bg-card);
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--bg-body);
+            color: var(--text-sub);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background: var(--primary-light);
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .bg-hot {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .bg-warm {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .bg-cold {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--primary);
+        }
+
+        /* PIPELINE TAB */
+        .pipeline-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .p-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .p-val {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .p-lbl {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            height: calc(100vh - 240px);
+            padding-bottom: 12px;
+        }
+
+        .kanban-col {
+            min-width: 280px;
+            width: 280px;
+            background: var(--bg-body);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-header {
+            padding: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .col-body {
+            padding: 8px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .deal-card {
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            cursor: grab;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .deal-val {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 12px;
+            float: right;
+        }
+
+        /* SETTINGS TAB */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .range-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+        }
+
+        /* AI SIDEBAR */
+        .ai-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 350px;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            z-index: 100;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .ai-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .ai-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .ai-score-box {
+            background: var(--primary-light);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .ai-score-val {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* TOAST & MODAL */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 24px;
+            background: #1e293b;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.3s;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal {
+            background: var(--bg-card);
+            width: 500px;
+            max-width: 90%;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            animation: scaleIn 0.2s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            aside {
+                position: absolute;
+                left: -260px;
+                height: 100%;
+                transition: 0.3s;
+            }
+
+            aside.open {
+                left: 0;
+                box-shadow: 10px 0 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside id="sidebar">
+        <div class="brand"><span>⚡</span> AION-CX 360°</div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="switchTab('overview')">📊 Overview</div>
+            <div class="nav-item" onclick="switchTab('leads')">👥 Live Leads</div>
+            <div class="nav-item" onclick="switchTab('pipeline')">💼 Pipeline</div>
+            <div class="nav-item" onclick="switchTab('settings')">⚙️ Settings</div>
+        </div>
+        <div class="user-profile">
+            <div class="avatar">VK</div>
+            <div style="font-size:13px;">
+                <div style="font-weight:600;">Vino K</div>
+                <div style="color:var(--text-sub); font-size:11px;">Admin</div>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <div class="header-left">
+                <button class="btn-icon" onclick="toggleSidebar()" style="display:none;">☰</button>
+                <div class="status-badge" id="statusBadge">Online</div>
+                <div class="status-badge demo-badge" id="demoBadge">DEMO MODE</div>
+                <div style="font-size:12px; color:var(--text-sub);" id="lastUpdated">Updated: Just now</div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" onclick="toggleTheme()" title="Toggle Theme">🌗</button>
+                <button class="btn-icon" onclick="showHelp()" title="Help">?</button>
+                <button class="btn-icon" onclick="globalSearch()" title="Search">🔍</button>
+            </div>
+        </header>
+
+        <!-- TAB 1: OVERVIEW -->
+        <div id="overview" class="tab-content active">
+            <div class="kpi-grid">
+                <div class="card kpi-card">
+                    <span class="kpi-label">Total Leads</span>
+                    <span class="kpi-value" id="kTotal">0</span>
+                    <span class="kpi-sub" style="color:var(--success)">↑ 12% vs last week</span>
+                </div>
+                <div class="card kpi-card">
+                    <span class="kpi-label">Hot Leads 🔥</span>
+                    <span class="kpi-value" id="kHot" style="color:var(--danger)">0</span>
+                    <span class="kpi-sub">High Intent</span>
+                </div>
+                <div class="card kpi-card">
+                    <span class="kpi-label">Expected Revenue</span>
+                    <span class="kpi-value" id="kRev" style="color:var(--success)">₹0</span>
+                    <span class="kpi-sub">Pipeline Value</span>
+                </div>
+                <div class="card kpi-card">
+                    <span class="kpi-label">AI Risk Index</span>
+                    <span class="kpi-value" id="kRisk" style="font-size:20px; color:var(--warning)">Low</span>
+                    <span class="kpi-sub">Based on churn signals</span>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h3 style="margin-bottom:16px; font-size:16px;">Traffic & Lead Trends</h3>
+                    <div class="chart-container"><canvas id="lineChart"></canvas></div>
+                </div>
+                <div class="card insights-panel">
+                    <h3 style="margin-bottom:16px; font-size:16px; color:var(--primary);">🧠 AI Daily Brief</h3>
+                    <p style="font-size:13px; margin-bottom:16px; line-height:1.5;" id="aiSummary">Loading insights...
+                    </p>
+                    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">TOP RECOMMENDATIONS</div>
+                    <div id="aiRecs"></div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h3 style="margin-bottom:16px; font-size:16px;">Lead Distribution</h3>
+                    <div class="chart-container"><canvas id="barChart"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom:16px; font-size:16px;">Conversion Funnel</h3>
+                    <div class="chart-container"><canvas id="funnelChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: LIVE LEADS -->
+        <div id="leads" class="tab-content">
+            <div class="card">
+                <div class="filters-bar">
+                    <input type="text" id="lSearch" placeholder="Search leads..." onkeyup="renderLeads()"
+                        style="width:250px;">
+                    <select id="lInd" onchange="renderLeads()">
+                        <option value="">All Industries</option>
+                        <option value="SaaS">SaaS</option>
+                        <option value="E-commerce">E-commerce</option>
+                        <option value="Finance">Finance</option>
+                    </select>
+                    <select id="lStage" onchange="renderLeads()">
+                        <option value="">All Stages</option>
+                        <option value="New">New</option>
+                        <option value="Hot">Hot</option>
+                        <option value="Qualified">Qualified</option>
+                    </select>
+                    <div style="flex:1"></div>
+                    <button class="btn btn-outline" onclick="exportCSV('leads')">📥 Export CSV</button>
+                </div>
+                <div class="table-container">
+                    <table id="leadsTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Company</th>
+                                <th>Score</th>
+                                <th>Stage</th>
+                                <th>Last Seen</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: PIPELINE -->
+        <div id="pipeline" class="tab-content">
+            <div class="pipeline-stats">
+                <div class="p-stat"><span class="p-val" id="pVal">₹0</span><span class="p-lbl">Total Value</span></div>
+                <div class="p-stat"><span class="p-val" id="pCount">0</span><span class="p-lbl">Active Deals</span>
+                </div>
+                <div class="p-stat"><span class="p-val" id="pWin">0%</span><span class="p-lbl">Win Rate</span></div>
+                <div style="flex:1"></div>
+                <button class="btn btn-primary" onclick="fetchPipeline()">🔄 Sync</button>
+                <button class="btn btn-outline" onclick="exportCSV('pipeline')">📥 Export CSV</button>
+            </div>
+            <div class="kanban-board" id="kanban">
+                <!-- Columns injected via JS -->
+            </div>
+        </div>
+
+        <!-- TAB 4: SETTINGS -->
+        <div id="settings" class="tab-content">
+            <div class="settings-grid">
+                <div class="card">
+                    <h3 style="margin-bottom:16px;">🔌 API Configuration</h3>
+                    <div class="form-group">
+                        <label class="form-label">Backend URL</label>
+                        <input type="text" id="confUrl" style="width:100%">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gemini API Key (Masked)</label>
+                        <input type="password" value="****************" disabled
+                            style="width:100%; background:#f1f5f9;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-primary" onclick="saveConf()">Save Settings</button>
+                        <button class="btn btn-outline" onclick="testConn()">Test Connection</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom:16px;">⚖️ AI Scoring Weights</h3>
+                    <div class="form-group">
+                        <label class="form-label">Intent Weight <span id="vIntent"
+                                style="float:right; font-weight:700;">50</span></label>
+                        <div class="range-wrap"><input type="range" id="wIntent" oninput="updateRange('Intent')"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Budget Weight <span id="vBudget"
+                                style="float:right; font-weight:700;">30</span></label>
+                        <div class="range-wrap"><input type="range" id="wBudget" oninput="updateRange('Budget')"></div>
+                    </div>
+                    <button class="btn btn-outline" onclick="saveWeights()">Update Model</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom:16px;">🛠️ Data Tools</h3>
+                    <button class="btn btn-primary" style="width:100%; margin-bottom:12px;"
+                        onclick="triggerAction('crm/syncAll')">Sync All Leads to CRM</button>
+                    <button class="btn btn-outline" style="width:100%; margin-bottom:12px;"
+                        onclick="triggerAction('ai/rescoreAll')">Re-run AI Scoring</button>
+                    <button class="btn btn-outline" style="width:100%; color:var(--danger); border-color:var(--danger);"
+                        onclick="localStorage.clear(); location.reload();">Clear Local Cache</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI SIDEBAR -->
+    <div class="ai-sidebar" id="aiSidebar">
+        <div class="ai-header">
+            <span>AI Lead Insights</span>
+            <button class="btn-icon" onclick="closeAiSidebar()" style="width:28px; height:28px;">✕</button>
+        </div>
+        <div class="ai-content" id="aiContent">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">Notification</div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal">
+            <h3 id="modalTitle" style="margin-bottom:12px;">Title</h3>
+            <div id="modalBody" style="font-size:14px; line-height:1.5; color:var(--text-sub);">Content</div>
+            <div style="margin-top:20px; text-align:right;">
+                <button class="btn btn-primary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL CONFIG ---
+        let API_URL = localStorage.getItem("aion_backend_url") || "http://localhost:3000";
+        let DEMO_MODE = false;
+        let REFRESH_TIMER = null;
+        let DATA = { leads: [], pipeline: [], overview: {} };
+        const STAGES = ["New", "Qualified", "Proposal", "Negotiation", "Won", "Lost"];
+
+        // --- INIT ---
+        window.onload = () => {
+            document.getElementById('confUrl').value = API_URL;
+            if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+            switchTab('overview');
+            startAutoRefresh();
+
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT') return;
+                if (e.key === '1') switchTab('overview');
+                if (e.key === '2') switchTab('leads');
+                if (e.key === '3') switchTab('pipeline');
+                if (e.key === '4') switchTab('settings');
+            });
+        };
+
+        // --- NAVIGATION ---
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelector(`.nav-item[onclick="switchTab('${id}')"]`).classList.add('active');
+
+            if (id === 'overview') fetchOverview();
+            if (id === 'leads') fetchLeads();
+            if (id === 'pipeline') fetchPipeline();
+        }
+
+        function startAutoRefresh() {
+            if (REFRESH_TIMER) clearInterval(REFRESH_TIMER);
+            REFRESH_TIMER = setInterval(() => {
+                const active = document.querySelector('.tab-content.active').id;
+                if (active === 'overview') fetchOverview();
+                if (active === 'leads') fetchLeads();
+                if (active === 'pipeline') fetchPipeline();
+                document.getElementById('lastUpdated').innerText = `Updated: ${new Date().toLocaleTimeString()}`;
+            }, 5000);
+        }
+
+        // --- DATA FETCHING ---
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            if (DEMO_MODE) return getMockData(endpoint);
+            try {
+                const opts = { method, headers: { 'Content-Type': 'application/json' } };
+                if (body) opts.body = JSON.stringify(body);
+                const res = await fetch(`${API_URL}/${endpoint}`, opts);
+                if (!res.ok) throw new Error("API Error");
+                return await res.json();
+            } catch (e) {
+                if (!DEMO_MODE) {
+                    console.warn("API Failed, switching to Demo Mode");
+                    DEMO_MODE = true;
+                    document.getElementById('demoBadge').style.display = 'flex';
+                    document.getElementById('statusBadge').classList.add('offline');
+                    document.getElementById('statusBadge').innerText = 'Offline';
+                    showToast('error', "Backend Unreachable. Demo Mode Active.");
+                }
+                return getMockData(endpoint);
+            }
+        }
+
+        async function fetchOverview() {
+            const data = await apiCall('dashboard/overview');
+            DATA.overview = data;
+            renderOverview();
+        }
+
+        async function fetchLeads() {
+            const data = await apiCall('leads/live');
+            DATA.leads = Array.isArray(data) ? data : [];
+            renderLeads();
+        }
+
+        async function fetchPipeline() {
+            const data = await apiCall('pipeline/data');
+            DATA.pipeline = Array.isArray(data) ? data : [];
+            renderPipeline();
+        }
+
+        // --- RENDERING ---
+        function renderOverview() {
+            const d = DATA.overview;
+            document.getElementById('kTotal').innerText = d.total_leads || 0;
+            document.getElementById('kHot').innerText = d.hot_leads || 0;
+            document.getElementById('kRev').innerText = `₹${(d.revenue || 0).toLocaleString()}`;
+
+            document.getElementById('aiSummary').innerText = d.ai_summary || "AI is analyzing traffic patterns...";
+            const recs = d.recommendations || ["Focus on high intent leads", "Follow up with pricing visitors"];
+            document.getElementById('aiRecs').innerHTML = recs.map(r =>
+                `<div class="insight-item"><span class="insight-icon">💡</span> ${r}</div>`
+            ).join('');
+
+            drawChart('lineChart', 'line', [12, 19, 15, 25, 32, 40, 45]);
+            drawChart('barChart', 'bar', [d.hot_leads || 0, d.warm_leads || 0, d.cold_leads || 0]);
+            drawChart('funnelChart', 'funnel', [100, 60, 40, 20, 10]);
+        }
+
+        function renderLeads() {
+            const tbody = document.querySelector('#leadsTable tbody');
+            tbody.innerHTML = '';
+            const search = document.getElementById('lSearch').value.toLowerCase();
+            const ind = document.getElementById('lInd').value;
+            const stage = document.getElementById('lStage').value;
+
+            const filtered = DATA.leads.filter(l => {
+                const mS = (l.name || '').toLowerCase().includes(search) || (l.company || '').toLowerCase().includes(search);
+                const mI = !ind || l.industry === ind;
+                const mSt = !stage || l.stage === stage;
+                return mS && mI && mSt;
+            });
+
+            filtered.forEach(l => {
+                const badgeClass = l.lead_score >= 80 ? 'bg-hot' : (l.lead_score >= 50 ? 'bg-warm' : 'bg-cold');
+                tbody.innerHTML += `
+            <tr onclick="openAiSidebar('${l.visitor_id}')">
+                <td><b>${l.name || 'Visitor'}</b></td>
+                <td>${l.email || '-'}</td>
+                <td>${l.company || '-'}</td>
+                <td><span class="badge ${badgeClass}">${l.lead_score}</span></td>
+                <td>${l.stage || 'New'}</td>
+                <td>Just now</td>
+                <td><button class="btn btn-outline" style="padding:2px 6px; font-size:10px;" onclick="event.stopPropagation(); openWidget('${l.visitor_id}')">Widget</button></td>
+            </tr>
+        `;
+            });
+        }
+
+        function renderPipeline() {
+            const board = document.getElementById('kanban');
+            board.innerHTML = '';
+            let totalVal = 0;
+            let count = 0;
+
+            STAGES.forEach(stage => {
+                const items = DATA.pipeline.filter(i => (i.stage || 'New') === stage);
+                count += items.length;
+
+                const cards = items.map(i => {
+                    const val = (i.lead_score * 1000);
+                    totalVal += val;
+                    return `
+            <div class="deal-card" draggable="true" ondragstart="drag(event, '${i.visitor_id}')">
+                <div style="font-weight:600; font-size:13px; margin-bottom:4px;">${i.name || 'Visitor'}</div>
+                <div style="font-size:11px; color:var(--text-sub); margin-bottom:8px;">${i.company || 'No Company'}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="badge bg-cold">${i.lead_score}</span>
+                    <span class="deal-val">₹${val.toLocaleString()}</span>
+                </div>
+                <div style="font-size:10px; color:var(--text-sub); margin-top:6px; display:flex; align-items:center; gap:4px;">
+                    <span>🕒 ${getDaysInStage(i.stage_updated_at)}d in stage</span>
+                </div>
+            </div>`;
+                }).join('');
+
+                board.innerHTML += `
+            <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, '${stage}')">
+                <div class="col-header">
+                    <span>${stage}</span>
+                    <span class="badge" style="background:var(--border);">${items.length}</span>
+                </div>
+                <div class="col-body">${cards}</div>
+            </div>
+        `;
+            });
+
+            document.getElementById('pVal').innerText = `₹${totalVal.toLocaleString()}`;
+            document.getElementById('pCount').innerText = count;
+        }
+        // --- AI SIDEBAR ---
+        function openAiSidebar(id) {
+            const lead = DATA.leads.find(l => l.visitor_id === id);
+            if (!lead) return;
+
+            const html = `
+                    < div class="ai-score-box" >
+            <div style="font-size:11px; text-transform:uppercase; margin-bottom:4px;">AI Lead Score</div>
+            <div class="ai-score-val">${lead.lead_score}</div>
+            <div style="font-size:12px; margin-top:4px;">${lead.lead_score > 80 ? '🔥 High Intent' : '❄️ Low Intent'}</div>
+        </div >
+        <div class="form-group">
+            <label class="form-label">Identity</label>
+            <div style="font-weight:600;">${lead.name || 'Visitor'}</div>
+            <div style="font-size:13px; color:var(--text-sub);">${lead.email || 'No Email'}</div>
+            <div style="font-size:13px; color:var(--text-sub);">${lead.company || 'No Company'}</div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">AI Summary</label>
+            <div style="font-size:13px; line-height:1.5; background:var(--bg-body); padding:10px; border-radius:8px;">
+                ${lead.ai_summary || 'AI is analyzing this visitor based on their recent interactions.'}
+            </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:20px;">
+            <button class="btn btn-primary" style="width:100%;" onclick="showToast('success', 'Email Generated')">✨ Generate AI Email</button>
+            <button class="btn btn-outline" style="width:100%;" onclick="openWidget('${id}')">Open Widget</button>
+        </div>
+                `;
+            document.getElementById('aiContent').innerHTML = html;
+            document.getElementById('aiSidebar').classList.add('open');
+        }
+        function closeAiSidebar() { document.getElementById('aiSidebar').classList.remove('open'); }
+
+        // --- DRAG & DROP ---
+        function drag(ev, id) { ev.dataTransfer.setData("text", id); }
+        function allowDrop(ev) { ev.preventDefault(); }
+        async function drop(ev, newStage) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            const lead = DATA.pipeline.find(l => l.visitor_id === id);
+            if (lead) {
+                lead.stage = newStage;
+                lead.stage_updated_at = new Date().toISOString();
+                renderPipeline();
+                showToast('success', `Lead ${lead.name || 'Visitor'} moved to ${newStage}`);
+                await apiCall(`leads/${id}/stage`, 'PUT', { stage: newStage });
+            }
+        }
+
+        // --- CHARTING ---
+        function drawChart(canvasId, type, data) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const cvs = ctx.canvas; cvs.width = cvs.offsetWidth; cvs.height = cvs.offsetHeight;
+            const h = cvs.height, w = cvs.width;
+            ctx.clearRect(0, 0, w, h);
+
+            if (type === 'line') {
+                ctx.beginPath(); ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 3;
+                const step = w / (data.length - 1);
+                const max = Math.max(...data, 10);
+                data.forEach((v, i) => {
+                    const y = h - (v / max) * (h - 40) - 20;
+                    if (i === 0) ctx.moveTo(i * step, y); else ctx.lineTo(i * step, y);
+                });
+                ctx.stroke();
+                ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fillStyle = 'rgba(37,99,235,0.1)'; ctx.fill();
+            } else if (type === 'bar') {
+                const colors = ['#ef4444', '#f59e0b', '#3b82f6'];
+                const barW = 40, gap = 30, startX = (w - (3 * barW + 2 * gap)) / 2;
+                const max = Math.max(...data, 10);
+                data.forEach((v, i) => {
+                    const bh = (v / max) * (h - 40);
+                    ctx.fillStyle = colors[i];
+                    ctx.fillRect(startX + i * (barW + gap), h - bh - 20, barW, bh);
+                });
+            } else if (type === 'funnel') {
+                const colors = ['#e2e8f0', '#93c5fd', '#60a5fa', '#3b82f6', '#1d4ed8'];
+                const maxW = w - 60, bh = 30, gap = 15;
+                data.forEach((v, i) => {
+                    const bw = (v / 100) * maxW;
+                    ctx.fillStyle = colors[i];
+                    ctx.fillRect((w - bw) / 2, i * (bh + gap) + 20, bw, bh);
+                });
+            }
+        }
+
+        // --- UTILS ---
+        function saveConf() {
+            const url = document.getElementById('confUrl').value;
+            if (url) {
+                API_URL = url;
+                localStorage.setItem("aion_backend_url", url);
+                showToast('success', "Configuration Saved");
+                DEMO_MODE = false;
+                document.getElementById('demoBadge').style.display = 'none';
+                document.getElementById('statusBadge').classList.remove('offline');
+                document.getElementById('statusBadge').innerText = 'Online';
+            }
+        }
+
+        function updateRange(key) { document.getElementById('v' + key).innerText = document.getElementById('w' + key).value; }
+        function saveWeights() { showToast('success', "AI Model Updated"); }
+        function triggerAction(ep) { showToast('info', "Processing..."); setTimeout(() => showToast('success', "Action Completed"), 1500); }
+        function openWidget(id) { window.open(`../frontend-widget/index.html?visitor_id=${id}`, '_blank'); }
+        function exportCSV(type) { showToast('success', `Exporting ${type} to CSV...`); }
+
+        function showHelp() {
+            document.getElementById('modalTitle').innerText = "Dashboard Help";
+            document.getElementById('modalBody').innerHTML = "<b>Overview:</b> High-level metrics.<br><b>Leads:</b> Real-time visitor list.<br><b>Pipeline:</b> Kanban deal flow.<br><b>Settings:</b> Configure API & AI.";
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if (!e || e.target.id === 'modalOverlay' || !e.target.id) document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        function toggleTheme() {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            if (window.innerWidth <= 768) sb.classList.toggle('open');
+        }
+
+        function showToast(type, msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.className = `toast show ${type}`;
+            setTimeout(() => t.className = 'toast', 3000);
+        }
+
+        function globalSearch() { showToast('info', "Global Search Active"); }
+        function testConn() { showToast('info', "Testing Connection..."); setTimeout(() => showToast('success', "Connection OK"), 1000); }
+
+        function getDaysInStage(dateStr) {
+            if (!dateStr) return 0;
+            const diff = new Date() - new Date(dateStr);
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+
+        // --- MOCK DATA ---
+        function getMockData(ep) {
+            if (ep.includes('overview')) return { total_leads: 142, hot_leads: 18, warm_leads: 45, cold_leads: 79, revenue: 520000, ai_summary: "Traffic is up 12%. High intent detected in SaaS sector." };
+            if (ep.includes('leads') || ep.includes('pipeline')) return [
+                { visitor_id: "v1", name: "Alice Tech", email: "alice@saas.com", company: "Cloud Inc", lead_score: 92, industry: "SaaS", stage: "Negotiation" },
+                { visitor_id: "v2", name: "Bob Retail", email: "bob@shop.com", company: "Shopify", lead_score: 65, industry: "E-commerce", stage: "Qualified" },
+                { visitor_id: "v3", name: "Charlie Fin", email: "c@bank.com", company: "Bank Corp", lead_score: 40, industry: "Finance", stage: "New" }
+            ];
+            return {};
+        }
+    </script>
+</body>
+
+</html>

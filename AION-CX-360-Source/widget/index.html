@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AION Operator Intelligence Widget</title>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --font: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #60a5fa;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-size: 13px;
+            line-height: 1.5;
+            padding-bottom: 80px;
+        }
+
+        /* HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            z-index: 50;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-id {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .user-meta h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .user-meta p {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin: 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* COMPONENTS */
+        .card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .card-head {
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .card-head::after {
+            content: '▼';
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        .card.collapsed .card-head::after {
+            transform: rotate(-90deg);
+        }
+
+        .card-body {
+            padding: 16px;
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        .card.collapsed .card-body {
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            border: none;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--border);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-icon {
+            padding: 6px;
+            border-radius: 50%;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .bg-red {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .bg-orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .bg-green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .bg-blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
+        /* PROFILE GRID */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-bottom: 2px;
+        }
+
+        .info-item span {
+            font-weight: 500;
+        }
+
+        /* SCORES */
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .score-label {
+            width: 100px;
+            font-size: 12px;
+        }
+
+        .score-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-body);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .score-val {
+            width: 30px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* INSIGHTS */
+        .insight-box {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .pain-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        /* JOURNEY & TIMELINE */
+        .timeline-item {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            border-left: 2px solid var(--border);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -5px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .timeline-time {
+            font-size: 10px;
+            color: var(--text-sub);
+        }
+
+        .heatmap-bar {
+            display: flex;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .heat-seg {
+            height: 100%;
+            opacity: 0.8;
+        }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg-card);
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .chip {
+            white-space: nowrap;
+            padding: 6px 12px;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 1. HEADER -->
+    <header>
+        <div class="user-id">
+            <div class="avatar" id="uAvatar">U</div>
+            <div class="user-meta">
+                <h3 id="uName">Loading...</h3>
+                <p id="uEmail">...</p>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-icon" onclick="toggleTheme()">🌗</button>
+            <button class="btn btn-icon" onclick="fetchData()">🔄</button>
+            <button class="btn btn-primary" onclick="openCRM()">CRM ↗</button>
+        </div>
+    </header>
+
+    <!-- 2. PROFILE -->
+    <div class="card">
+        <div class="card-head" onclick="toggleCard(this)">👤 Visitor Profile</div>
+        <div class="card-body">
+            <div class="grid-2">
+                <div class="info-item"><label>Company</label><span id="pCompany">-</span></div>
+                <div class="info-item"><label>Industry</label><span id="pIndustry">-</span></div>
+                <div class="info-item"><label>Location</label><span id="pLoc">-</span></div>
+                <div class="info-item"><label>Phone</label><span id="pPhone">-</span></div>
+                <div class="info-item"><label>Budget</label><span id="pBudget">-</span></div>
+                <div class="info-item"><label>Source</label><span id="pSource">-</span></div>
+            </div>
+            <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span class="badge bg-blue" id="pReturn">Return Visitor</span>
+                <span style="font-size: 11px; color: var(--text-sub);" id="pSeen">Active Now</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. AI SCORES -->
+    <div class="card">
+        <div class="card-head" onclick="toggleCard(this)">📊 AI Score Engine</div>
+        <div class="card-body" id="scoreContainer">
+            <!-- Scores injected via JS -->
+        </div>
+        <div style="padding: 0 16px 16px;">
+            <button class="btn" style="width: 100%;" onclick="rescoreLead()">⚡ Re-calculate Scores</button>
+        </div>
+    </div>
+
+    <!-- 4. AI INSIGHTS -->
+    <div class="card">
+        <div class="card-head" onclick="toggleCard(this)">🧠 AI Insights</div>
+        <div class="card-body">
+            <div class="insight-box">
+                <strong>Summary:</strong> <span id="aiSummary">Analyzing...</span>
+            </div>
+            <div class="grid-2" style="margin-bottom: 12px;">
+                <div class="insight-box"
+                    style="margin:0; border-color: var(--success); background: rgba(16,185,129,0.05);">
+                    <strong>Next Action:</strong><br><span id="aiAction">-</span>
+                </div>
+                <div class="insight-box"
+                    style="margin:0; border-color: var(--warning); background: rgba(245,158,11,0.05);">
+                    <strong>Persona:</strong><br><span id="aiPersona">-</span>
+                </div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 11px; color: var(--text-sub);">Pain Points:</label>
+                <div class="pain-tags" id="aiPain">-</div>
+            </div>
+            <div class="grid-2">
+                <button class="btn" onclick="genEmail()">✉️ Draft Email</button>
+                <button class="btn" onclick="genDeal()">💼 Deal Strategy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. JOURNEY -->
+    <div class="card">
+        <div class="card-head" onclick="toggleCard(this)">🗺️ Visitor Journey</div>
+        <div class="card-body">
+            <div class="heatmap-bar" id="heatmap"></div>
+            <div style="font-size: 12px; margin-bottom: 8px;">
+                <strong>Current:</strong> <span id="jCurrent">/</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-sub);">
+                <strong>Predicted Next:</strong> <span id="jNext">...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. TIMELINE -->
+    <div class="card">
+        <div class="card-head" onclick="toggleCard(this)">🕒 Timeline</div>
+        <div class="card-body" id="timelineList">
+            <!-- Timeline items injected via JS -->
+        </div>
+    </div>
+
+    <!-- 7. QUICK ACTIONS -->
+    <div class="quick-actions" id="quickReplies">
+        <!-- Chips injected via JS -->
+    </div>
+
+    <div class="toast" id="toast">Action Successful</div>
+
+    <script>
+        // --- CONFIG ---
+        const API_URL = localStorage.getItem("aion_backend_url") || "http://localhost:3000";
+        const VISITOR_ID = new URLSearchParams(window.location.search).get("visitor_id") || "test_visitor_1";
+
+        // --- STATE ---
+        let visitorData = {};
+        let refreshTimer = null;
+
+        // --- INIT ---
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+            fetchData();
+            startLiveSync();
+        };
+
+        function startLiveSync() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(fetchData, 5000);
+        }
+
+        // --- API CALLS ---
+        async function fetchData() {
+            try {
+                const res = await fetch(`${API_URL}/insights/${VISITOR_ID}`);
+                if (!res.ok) throw new Error();
+                visitorData = await res.json();
+                renderUI(visitorData);
+            } catch (e) {
+                console.warn("Using Mock Data");
+                renderUI(getMockData());
+            }
+        }
+
+        async function rescoreLead() {
+            toast("Re-calculating Scores...");
+            await post(`${API_URL}/ai/rescore/${VISITOR_ID}`);
+            fetchData();
+        }
+
+        async function genEmail() {
+            toast("Generating Email Draft...");
+            await post(`${API_URL}/ai/email`, { visitor_id: VISITOR_ID });
+        }
+
+        async function genDeal() {
+            toast("Generating Deal Strategy...");
+            await post(`${API_URL}/ai/deal`, { visitor_id: VISITOR_ID });
+        }
+
+        async function openCRM() {
+            if (visitorData.crm_url) window.open(visitorData.crm_url, '_blank');
+            else toast("CRM Profile Not Found");
+        }
+
+        async function post(url, body = {}) {
+            try {
+                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                toast("Action Completed");
+            } catch (e) { toast("Action Failed"); }
+        }
+
+        // --- RENDER ---
+        function renderUI(data) {
+            // 1. Header
+            document.getElementById('uName').innerText = data.identity.name || "Visitor";
+            document.getElementById('uEmail').innerText = data.identity.email || "No Email";
+            document.getElementById('uAvatar').innerText = (data.identity.name || "U").charAt(0);
+
+            // 2. Profile
+            document.getElementById('pCompany').innerText = data.identity.company || "-";
+            document.getElementById('pIndustry').innerText = data.identity.industry || "-";
+            document.getElementById('pLoc').innerText = data.identity.location || "Unknown";
+            document.getElementById('pPhone').innerText = data.identity.phone || "-";
+            document.getElementById('pBudget').innerText = data.identity.budget || "-";
+            document.getElementById('pSource').innerText = data.identity.source || "Direct";
+            document.getElementById('pReturn').style.display = data.identity.is_return ? 'inline-block' : 'none';
+
+            // 3. Scores
+            const scores = [
+                { l: "Lead Score", v: data.scores.lead_score },
+                { l: "Intent", v: data.scores.intent },
+                { l: "Fit", v: data.scores.fit },
+                { l: "Behavior", v: data.scores.behavior },
+                { l: "Budget", v: data.scores.budget },
+                { l: "Urgency", v: data.scores.urgency },
+                { l: "Emotion", v: data.scores.emotion },
+                { l: "Conversion", v: data.scores.conversion }
+            ];
+            const sCont = document.getElementById('scoreContainer');
+            sCont.innerHTML = '';
+            scores.forEach(s => {
+                const color = s.v >= 80 ? 'var(--danger)' : (s.v >= 50 ? 'var(--warning)' : 'var(--primary)');
+                sCont.innerHTML += `
+                    <div class="score-row">
+                        <div class="score-label">${s.l}</div>
+                        <div class="score-track"><div class="score-fill" style="width:${s.v}%; background:${color}"></div></div>
+                        <div class="score-val" style="color:${color}">${s.v}</div>
+                    </div>
+                `;
+            });
+
+            // 4. Insights
+            document.getElementById('aiSummary').innerText = data.insights.summary || "No summary available.";
+            document.getElementById('aiAction').innerText = data.insights.next_action || "-";
+            document.getElementById('aiPersona').innerText = data.insights.persona || "Unknown";
+
+            const pTags = document.getElementById('aiPain');
+            pTags.innerHTML = '';
+            (data.insights.pain_points || []).forEach(p => pTags.innerHTML += `<span class="tag">${p}</span>`);
+
+            // 5. Journey
+            document.getElementById('jCurrent').innerText = data.journey.current_page;
+            document.getElementById('jNext').innerText = data.journey.predicted_next;
+            const hMap = document.getElementById('heatmap');
+            hMap.innerHTML = '';
+            (data.journey.heatmap || []).forEach(h => {
+                hMap.innerHTML += `<div class="heat-seg" style="width:${h.percent}%; background:${h.color}"></div>`;
+            });
+
+            // 6. Timeline
+            const tList = document.getElementById('timelineList');
+            tList.innerHTML = '';
+            (data.timeline || []).slice(0, 5).forEach(t => {
+                tList.innerHTML += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-time">${t.time}</div>
+                        <div style="font-weight:500">${t.event}</div>
+                    </div>
+                `;
+            });
+
+            // 7. Quick Actions
+            const qRep = document.getElementById('quickReplies');
+            qRep.innerHTML = `
+                <div class="chip" onclick="post('${API_URL}/crm/createOrUpdate')">⚡ Sync CRM</div>
+                <div class="chip" onclick="toast('Copied Summary')">📋 Copy Summary</div>
+            `;
+            (data.quick_replies || []).forEach(r => {
+                qRep.innerHTML += `<div class="chip" onclick="toast('Sent: ${r.substring(0, 10)}...')">💬 ${r}</div>`;
+            });
+        }
+
+        // --- UTILS ---
+        function toggleCard(head) {
+            head.parentElement.classList.toggle('collapsed');
+        }
+
+        function toggleTheme() {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function getMockData() {
+            return {
+                identity: { name: "Alice Tech", email: "alice@saas.com", company: "Cloud Inc", industry: "SaaS", location: "NY, USA", phone: "+1 555 0199", budget: "$10k - $50k", source: "LinkedIn", is_return: true },
+                scores: { lead_score: 88, intent: 92, fit: 85, behavior: 78, budget: 60, urgency: 95, emotion: 70, conversion: 82 },
+                insights: { summary: "High intent visitor looking for enterprise solutions.", next_action: "Offer annual plan discount.", persona: "Decision Maker", pain_points: ["Security", "Scale"] },
+                journey: { current_page: "/pricing", predicted_next: "/signup", heatmap: [{ percent: 30, color: "#ef4444" }, { percent: 50, color: "#f59e0b" }, { percent: 20, color: "#3b82f6" }] },
+                timeline: [{ time: "10:00 AM", event: "Visited Homepage" }, { time: "10:05 AM", event: "Viewed Pricing" }, { time: "10:08 AM", event: "Bot Chat Started" }],
+                quick_replies: ["Send Pricing PDF", "Book Demo", "Ask about Budget"]
+            };
+        }
+    </script>
+</body>
+
+</html>

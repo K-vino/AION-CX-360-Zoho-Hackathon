@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AION Operator Intelligence Panel</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --accent-purple: #8b5cf6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font-sans: 'Segoe UI', system-ui, sans-serif;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --primary-color: #60a5fa;
+            --primary-hover: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --glass-bg: rgba(30, 41, 59, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Components */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-size: 13px;
+            transition: all 0.2s;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-secondary);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-orange {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning-color);
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger-color);
+        }
+
+        .badge-blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--primary-color);
+        }
+
+        .badge-purple {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+        }
+
+        /* Header */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand span {
+            color: var(--primary-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .visitor-select {
+            padding: 6px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .visitor-select:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Identity */
+        .identity-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-purple));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .user-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .crm-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        /* Scores */
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .score-item {
+            background: var(--bg-secondary);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-val {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: color 0.3s;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .score-bar {
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .score-item:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Insights */
+        .insight-box {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 3px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 12px;
+            transition: background 0.3s;
+        }
+
+        .insight-box:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .insight-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .pain-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .pain-tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Signals & Heatmap */
+        .signal-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .signal-row:last-child {
+            border-bottom: none;
+        }
+
+        .signal-val {
+            font-weight: 600;
+        }
+
+        #heatmapCanvas {
+            width: 100%;
+            height: 60px;
+            border-radius: var(--radius-md);
+            margin-top: 8px;
+            background: var(--bg-secondary);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 8px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -26px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 2px solid var(--bg-card);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .timeline-content {
+            background: var(--bg-secondary);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+        }
+
+        .timeline-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        /* Actions & Quick Replies */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .reply-chip {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .reply-chip:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid var(--glass-border);
+            box-shadow: -4px 0 25px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .panel-close:hover {
+            color: var(--text-primary);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 90;
+            display: none;
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none;
+        }
+
+        .text-sm {
+            font-size: 12px;
+        }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mt-4 {
+            margin-top: 16px;
+        }
+
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            color: transparent !important;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 200;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="top-bar">
+        <div class="brand">
+            <span>⚡</span> AION Intelligence
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <select id="visitorSelect" class="visitor-select" onchange="loadVisitor(this.value)">
+                <option value="v_12345">Visitor #12345</option>
+                <option value="v_67890">Visitor #67890</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="toggleTheme()">🌗</button>
+            <button class="btn btn-primary btn-sm" onclick="togglePanel()">View Journey →</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Left Column: Identity & Scores -->
+        <div class="col-left">
+            <!-- Identity Card -->
+            <div class="card">
+                <div class="identity-grid">
+                    <div class="avatar" id="avatar">JD</div>
+                    <div class="user-info">
+                        <h3 id="visitorName" class="skeleton-text">Loading...</h3>
+                        <div class="user-meta">
+                            <span id="visitorEmail" class="skeleton-text">...</span> • <span id="visitorCompany"
+                                class="skeleton-text">...</span>
+                        </div>
+                        <div class="user-meta" style="margin-top: 4px;">
+                            <span class="badge badge-blue" id="visitorIndustry">SaaS</span>
+                            <span class="badge badge-green" id="crmStatus">New Lead</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="crm-actions">
+                    <button class="btn btn-outline btn-sm" onclick="openCRM()">Open CRM ↗</button>
+                    <button class="btn btn-outline btn-sm" onclick="addNote()">+ Add Note</button>
+                </div>
+            </div>
+
+            <!-- AI Scores -->
+            <div class="card">
+                <div class="card-header">AI Predictive Scores</div>
+                <div class="score-grid" id="scoreGrid">
+                    <!-- Scores injected by JS -->
+                </div>
+            </div>
+
+            <!-- Real-time Signals -->
+            <div class="card">
+                <div class="card-header">Live Signals 📡</div>
+                <div class="signal-row"><span>Status</span> <span class="signal-val badge badge-green">Active Now</span>
+                </div>
+                <div class="signal-row"><span>Page</span> <span class="signal-val" id="currentPage">/pricing</span>
+                </div>
+                <div class="signal-row"><span>Time on Site</span> <span class="signal-val"
+                        id="sessionDuration">02:14</span></div>
+                <div class="signal-row"><span>Device</span> <span class="signal-val">Desktop (Chrome)</span></div>
+                <div class="signal-row"><span>Source</span> <span class="signal-val">Google Ads</span></div>
+
+                <div class="mt-4">
+                    <div class="card-header" style="font-size: 13px; margin-bottom: 4px;">Activity Heatmap (30m)</div>
+                    <canvas id="heatmapCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Insights & Actions -->
+        <div class="col-right">
+
+            <!-- AI Insights -->
+            <div class="card">
+                <div class="card-header">
+                    <span>🧠 AI Analysis</span>
+                    <span class="badge badge-purple" id="personaTag">Technical Buyer</span>
+                </div>
+
+                <div class="insight-box">
+                    <div class="insight-title">Executive Summary</div>
+                    <div class="insight-text" id="aiSummary">Analyzing conversation patterns...</div>
+                </div>
+
+                <div class="insight-box"
+                    style="border-color: var(--warning-color); background: rgba(245, 158, 11, 0.05);">
+                    <div class="insight-title" style="color: var(--warning-color);">Next Best Action</div>
+                    <div class="insight-text" id="nextAction">Suggest the 'Enterprise' plan based on team size.</div>
+                </div>
+
+                <div style="margin-top: 12px;">
+                    <div class="text-sm text-secondary mb-2">Identified Pain Points:</div>
+                    <div class="pain-points" id="painPoints">
+                        <!-- Tags injected by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Actions -->
+            <div class="card">
+                <div class="card-header">AI Actions</div>
+                <div class="action-grid">
+                    <button class="btn btn-primary btn-sm" onclick="triggerAI('rescore')">⚡ Re-score Lead</button>
+                    <button class="btn btn-outline btn-sm" onclick="triggerAI('email')">✉️ Generate Email</button>
+                    <button class="btn btn-outline btn-sm" onclick="triggerAI('deal')">💼 Deal Strategy</button>
+                    <button class="btn btn-outline btn-sm" onclick="triggerAI('explain')">❓ Explain Quality</button>
+                </div>
+            </div>
+
+            <!-- Quick Replies -->
+            <div class="card">
+                <div class="card-header">Smart Replies</div>
+                <div class="quick-replies" id="quickReplies">
+                    <div class="reply-chip" onclick="sendReply('Here is our pricing guide...')">Send Pricing 💰</div>
+                    <div class="reply-chip" onclick="sendReply('Could you share your timeline?')">Ask Timeline 🗓️</div>
+                    <div class="reply-chip" onclick="sendReply('I recommend the Pro plan.')">Suggest Pro Plan 🚀</div>
+                    <div class="reply-chip" onclick="sendReply('Would you like a demo?')">Book Demo 📅</div>
+                </div>
+            </div>
+
+            <!-- Timeline Preview -->
+            <div class="card">
+                <div class="card-header">Recent Timeline</div>
+                <div class="timeline" id="timelinePreview">
+                    <!-- Timeline items injected by JS -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Side Panel (Customer Journey) -->
+    <div class="overlay" id="overlay" onclick="togglePanel()"></div>
+    <div class="side-panel" id="sidePanel">
+        <button class="panel-close" onclick="togglePanel()">×</button>
+        <h2>Customer Journey</h2>
+        <p class="text-secondary mb-2">Full interaction history</p>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+
+        <div class="timeline" id="fullTimeline">
+            <!-- Full timeline injected by JS -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Action Successful</div>
+
+    <script>
+        // CONFIGURATION
+        const API_URL = "http://localhost:3000";
+        let CURRENT_VISITOR = "v_12345";
+        let refreshTimer = null;
+
+        // MOCK DATA (Fallback)
+        const MOCK_DATA = {
+            identity: {
+                name: "John Doe",
+                email: "john.doe@techcorp.com",
+                company: "TechCorp Inc.",
+                industry: "SaaS",
+                crm_status: "Qualified",
+                crm_url: "#",
+                avatar: "JD"
+            },
+            scores: [
+                { label: "Lead Score", value: 85, color: "green", tip: "Overall quality" },
+                { label: "Intent", value: 92, color: "green", tip: "Buying intent" },
+                { label: "Fit", value: 78, color: "blue", tip: "ICP Match" },
+                { label: "Behavior", value: 88, color: "green", tip: "Engagement level" },
+                { label: "Sentiment", value: 65, color: "orange", tip: "Tone analysis" },
+                { label: "Urgency", value: 90, color: "red", tip: "Time sensitivity" },
+                { label: "Budget", value: 70, color: "blue", tip: "Budget fit" },
+                { label: "Conversion", value: 82, color: "green", tip: "Probability" }
+            ],
+            insights: {
+                summary: "Visitor is highly engaged with pricing page. Mentioned 'team scaling' issues. Likely looking for Enterprise plan.",
+                next_action: "Offer a demo of the SSO and Audit Log features.",
+                persona: "Technical Buyer",
+                pain_points: ["Scalability", "Security", "Integration"]
+            },
+            timeline: [
+                { time: "10:45 AM", type: "Page Visit", text: "Visited /pricing" },
+                { time: "10:46 AM", type: "Bot", text: "Bot triggered 'Pricing' flow" },
+                { time: "10:47 AM", type: "Message", text: "User asked about SSO" },
+                { time: "10:48 AM", type: "AI", text: "Lead Score updated to 85" }
+            ]
+        };
+
+        // INITIALIZATION
+        window.onload = () => {
+            loadVisitor(CURRENT_VISITOR);
+            drawHeatmap();
+            startLiveSync();
+
+            // Check Theme
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+        };
+
+        function startLiveSync() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(() => {
+                // Silent refresh
+                fetch(`${API_URL}/insights/${CURRENT_VISITOR}`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => { if (data) renderUI(data, true); })
+                    .catch(() => { });
+            }, 3000); // 3s refresh rate
+        }
+
+        // CORE FUNCTIONS
+        async function loadVisitor(id) {
+            CURRENT_VISITOR = id;
+            setSkeleton(true);
+            showToast(`Loading Visitor ${id}...`);
+
+            try {
+                // Try fetching from backend
+                const res = await fetch(`${API_URL}/insights/${id}`);
+                if (!res.ok) throw new Error("Backend unavailable");
+                const data = await res.json();
+                renderUI(data);
+            } catch (e) {
+                console.warn("Using Mock Data (Backend Offline)");
+                setTimeout(() => renderUI(MOCK_DATA), 500); // Simulate network delay
+            }
+        }
+
+        function setSkeleton(loading) {
+            const els = document.querySelectorAll('#visitorName, #visitorEmail, #visitorCompany');
+            els.forEach(el => {
+                if (loading) el.classList.add('skeleton');
+                else el.classList.remove('skeleton');
+            });
+        }
+
+        function renderUI(data, isUpdate = false) {
+            setSkeleton(false);
+
+            // Identity
+            document.getElementById('visitorName').innerText = data.identity.name || "Unknown";
+            document.getElementById('visitorEmail').innerText = data.identity.email || "No Email";
+            document.getElementById('visitorCompany').innerText = data.identity.company || "No Company";
+            document.getElementById('visitorIndustry').innerText = data.identity.industry || "General";
+            document.getElementById('crmStatus').innerText = data.identity.crm_status || "New";
+            document.getElementById('avatar').innerText = data.identity.avatar || "U";
+
+            // Scores - Only re-render if not update or values changed (simplified)
+            const scoreGrid = document.getElementById('scoreGrid');
+            if (!isUpdate || scoreGrid.children.length === 0) {
+                scoreGrid.innerHTML = '';
+                data.scores.forEach(s => {
+                    scoreGrid.innerHTML += `
+                        <div class="score-item">
+                            <div class="tooltip">${s.tip}</div>
+                            <div class="score-val" style="color: var(--${s.color}-color)">${s.value}</div>
+                            <div class="score-label">${s.label}</div>
+                            <div class="score-bar"><div class="score-fill" style="width: ${s.value}%; background: var(--${s.color}-color)"></div></div>
+                        </div>
+                    `;
+                });
+            } else {
+                // Update existing scores smoothly
+                const items = scoreGrid.querySelectorAll('.score-item');
+                data.scores.forEach((s, i) => {
+                    if (items[i]) {
+                        items[i].querySelector('.score-val').innerText = s.value;
+                        items[i].querySelector('.score-fill').style.width = `${s.value}%`;
+                    }
+                });
+            }
+
+            // Insights
+            document.getElementById('aiSummary').innerText = data.insights.summary;
+            document.getElementById('nextAction').innerText = data.insights.next_action;
+            document.getElementById('personaTag').innerText = data.insights.persona;
+
+            const ppContainer = document.getElementById('painPoints');
+            ppContainer.innerHTML = '';
+            data.insights.pain_points.forEach(p => {
+                ppContainer.innerHTML += `<span class="pain-tag">${p}</span>`;
+            });
+
+            // Timeline
+            renderTimeline(data.timeline, 'timelinePreview', 3);
+            renderTimeline(data.timeline, 'fullTimeline', 100);
+        }
+
+        function renderTimeline(events, containerId, limit) {
+            const container = document.getElementById(containerId);
+            // Simple diff check could be added here, for now just re-render
+            container.innerHTML = '';
+            events.slice(0, limit).forEach((e, i) => {
+                container.innerHTML += `
+                    <div class="timeline-item" style="animation-delay: ${i * 0.1}s">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-time">${e.time}</div>
+                            <div style="font-weight: 600; margin-bottom: 2px;">${e.type}</div>
+                            <div class="text-secondary">${e.text}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ACTIONS
+        async function triggerAI(action) {
+            showToast(`Triggering AI: ${action}...`);
+            try {
+                await fetch(`${API_URL}/ai/${action}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visitor_id: CURRENT_VISITOR })
+                });
+                setTimeout(() => showToast("AI Action Completed ✅"), 1500);
+            } catch (e) {
+                setTimeout(() => showToast("Action Simulated (Backend Offline)"), 1000);
+            }
+        }
+
+        function sendReply(text) {
+            // Send to parent window (SalesIQ)
+            window.parent.postMessage({ type: 'quick_reply', text: text }, '*');
+            showToast("Reply Sent to Chat");
+        }
+
+        function openCRM() {
+            window.open(MOCK_DATA.identity.crm_url, '_blank');
+        }
+
+        function addNote() {
+            const note = prompt("Enter note for CRM:");
+            if (note) triggerAI('crm/addNote'); // Simulated
+        }
+
+        // UI UTILS
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function togglePanel() {
+            document.getElementById('sidePanel').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // CANVAS HEATMAP ANIMATION
+        function drawHeatmap() {
+            const canvas = document.getElementById('heatmapCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const blocks = 40;
+            const blockWidth = width / blocks;
+
+            let offset = 0;
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                offset += 0.05;
+
+                for (let i = 0; i < blocks; i++) {
+                    // Create a wave effect
+                    const intensity = (Math.sin(i * 0.2 + offset) + 1) / 2;
+                    ctx.fillStyle = `rgba(59, 130, 246, ${intensity * 0.6 + 0.2})`;
+
+                    const h = height * (intensity * 0.8 + 0.2);
+                    ctx.fillRect(i * blockWidth, height - h, blockWidth - 2, h);
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Resize handler for canvas
+        window.onresize = () => {
+            const canvas = document.getElementById('heatmapCanvas');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        };
+
+    </script>
+</body>
+
+</html>

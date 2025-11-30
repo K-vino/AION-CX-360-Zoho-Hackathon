@@ -1,0 +1,43 @@
+{
+  "visitor_id": "test_visitor_1",
+  "name": "John Doe",
+  "email": "john.doe@techcorp.com",
+  "phone": "+1 (555) 123-4567",
+  "company": "TechCorp Inc.",
+  "industry": "SaaS",
+  "location": "San Francisco, USA",
+  "budget": "$100k+",
+  "timeline": "Immediate",
+  "lead_score": 95,
+  "behavior_score": 75,
+  "intent_score": 98,
+  "fit_score": 90,
+  "conversion_probability": 0.95,
+  "emotion": "Positive",
+  "ai_summary": "High-value enterprise prospect seeking immediate implementation. Budget confirmed.",
+  "ai_action": "Schedule Executive Demo",
+  "ai_risk": "Competitor evaluating similar solution",
+  "ai_opportunity": "High upsell potential for Q4",
+  "journey": [
+    {
+      "page": "Pricing",
+      "time": "2m 30s"
+    },
+    {
+      "page": "Case Studies",
+      "time": "5m 12s"
+    },
+    {
+      "page": "Home",
+      "time": "1m 05s"
+    }
+  ],
+  "crm_status": "Hot",
+  "crm_owner": "Sarah Connor",
+  "crm_stage": "Qualification",
+  "crm_tags": [
+    "Enterprise",
+    "High Value"
+  ],
+  "crm_url": "https://crm.zoho.com/crm/org/tab/Leads/4000000012345"
+}

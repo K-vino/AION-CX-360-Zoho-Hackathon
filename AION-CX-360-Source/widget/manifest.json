@@ -1,0 +1,10 @@
+{
+    "service": "SALESIQ",
+    "type": "WIDGET",
+    "name": "AION-CX 360 Operator Panel",
+    "logo": "logo.png",
+    "location": "OPERATOR_CHAT_PANEL",
+    "url": "index.html",
+    "height": "500px",
+    "width": "100%"
+}
